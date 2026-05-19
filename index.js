@@ -73,6 +73,43 @@ async function run() {
 
         });
 
+        // UPDATE PET
+
+        app.put("/pets/:id", async (req, res) => {
+
+            const id = req.params.id;
+
+            const updatedPet = req.body;
+
+            const result =
+                await petsCollection.updateOne(
+                    {
+                        _id: new ObjectId(id),
+                    },
+                    {
+                        $set: updatedPet,
+                    }
+                );
+
+            res.send(result);
+
+        });
+
+        // DELETE PET
+
+        app.delete("/pets/:id", async (req, res) => {
+
+            const id = req.params.id;
+
+            const result =
+                await petsCollection.deleteOne({
+                    _id: new ObjectId(id),
+                });
+
+            res.send(result);
+
+        });
+
         await client.connect();
 
         console.log("Connected to MongoDB!");
