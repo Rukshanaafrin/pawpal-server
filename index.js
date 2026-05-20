@@ -1,3 +1,6 @@
+const jwt = require("jsonwebtoken");
+const cookieParser = require("cookie-parser");
+
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
@@ -6,8 +9,14 @@ const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const app = express();
 const port = 5000;
 
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    credentials: true,
+  })
+);
 app.use(express.json());
+app.use(cookieParser());
 
 app.get("/", (req, res) => {
   res.send("PawPal Server is Running");
@@ -24,6 +33,31 @@ const client = new MongoClient(uri, {
   },
 });
 
+const verifyToken = (req, res, next) => {
+  const token = req.cookies?.token;
+
+  if (!token) {
+    return res.status(401).send({
+      message: "Unauthorized",
+    });
+  }
+
+  jwt.verify(
+    token,
+    process.env.JWT_SECRET,
+    (err, decoded) => {
+      if (err) {
+        return res.status(401).send({
+          message: "Unauthorized",
+        });
+      }
+
+      req.decoded = decoded;
+      next();
+    }
+  );
+};
+
 async function run() {
   try {
     await client.connect();
@@ -37,6 +71,32 @@ async function run() {
 
     const requestsCollection =
       client.db("pawpalDB").collection("requests");
+
+      app.post("/jwt", (req, res) => {
+  const user = req.body;
+
+  const token = jwt.sign(
+    user,
+    process.env.JWT_SECRET,
+    {
+      expiresIn: "7d",
+    }
+  );
+
+  res.cookie("token", token, {
+    httpOnly: true,
+    secure: false,
+    sameSite: "lax",
+  });
+
+  res.send({ success: true });
+});
+
+app.post("/logout", (req, res) => {
+  res.clearCookie("token");
+
+  res.send({ success: true });
+});
 
     // ==========================
     // PET APIs
