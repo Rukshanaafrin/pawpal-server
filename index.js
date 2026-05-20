@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
@@ -13,7 +14,7 @@ app.get("/", (req, res) => {
 });
 
 const uri =
-  "mongodb+srv://rukshanaafrinety797_db_user:AeTXILcRbG5Xvqvv@cluster0.0ogo0ei.mongodb.net/?appName=Cluster0";
+  `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.0ogo0ei.mongodb.net/?appName=Cluster0`;
 
 const client = new MongoClient(uri, {
   serverApi: {
