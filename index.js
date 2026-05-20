@@ -50,9 +50,28 @@ async function run() {
       res.send(result);
     });
 
+    // SEARCH + FILTER SUPPORT
     app.get("/pets", async (req, res) => {
+      const search = req.query.search || "";
+      const species = req.query.species || "";
+
+      let query = {};
+
+      if (search) {
+        query.name = {
+          $regex: search,
+          $options: "i",
+        };
+      }
+
+      if (species) {
+        query.species = {
+          $in: [species],
+        };
+      }
+
       const result =
-        await petsCollection.find().toArray();
+        await petsCollection.find(query).toArray();
 
       res.send(result);
     });
@@ -115,8 +134,6 @@ async function run() {
     app.get("/requests", async (req, res) => {
       const result =
         await requestsCollection.find().toArray();
-
-      console.log("Requests:", result);
 
       res.send(result);
     });
