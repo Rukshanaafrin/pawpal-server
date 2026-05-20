@@ -31,8 +31,13 @@ const client = new MongoClient(uri, {
 async function run() {
     try {
 
+        await client.connect();
+
         const petsCollection =
             client.db("pawpalDB").collection("pets");
+
+        const requestsCollection =
+            client.db("pawpalDB").collection("requests");
 
         // POST PET
 
@@ -110,7 +115,48 @@ async function run() {
 
         });
 
-        await client.connect();
+        // ==========================
+        // ADOPTION REQUEST APIs
+        // ==========================
+
+        // POST REQUEST
+
+        app.post("/requests", async (req, res) => {
+
+            const requestData = req.body;
+
+            const result =
+                await requestsCollection.insertOne(requestData);
+
+            res.send(result);
+
+        });
+
+        // GET ALL REQUESTS
+
+        app.get("/requests", async (req, res) => {
+
+            const result =
+                await requestsCollection.find().toArray();
+
+            res.send(result);
+
+        });
+
+        // DELETE REQUEST
+
+        app.delete("/requests/:id", async (req, res) => {
+
+            const id = req.params.id;
+
+            const result =
+                await requestsCollection.deleteOne({
+                    _id: new ObjectId(id),
+                });
+
+            res.send(result);
+
+        });
 
         console.log("Connected to MongoDB!");
 
