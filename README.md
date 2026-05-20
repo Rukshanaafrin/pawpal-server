@@ -88,9 +88,6 @@ DB_PASS=
 JWT_SECRET=
 ```
 
-## Live Server
-
-
 ## Author
 
 Mst. Rukshana Afrin
